@@ -1,0 +1,77 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\theoremstyle{plain}
+\newtheorem{problem}{题目}
+\theoremstyle{remark}
+\newtheorem*{remark*}{直觉}
+
+\newenvironment{solution}{\begin{proof}[证明]}{\end{proof}}
+
+\title{示例 1：数学分析式语言}
+\author{math-learn skill demo}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
+\textbf{风格说明}：开头一句直觉总结，随后给出完整 $\varepsilon$-$\delta$ 严谨证明，不省略量词和估计链。}}
+
+\bigskip
+
+\begin{problem}
+设 $f:[0,1]\to\mathbb{R}$ 在 $[0,1]$ 上 Riemann 可积，且在 $x=0$ 处连续。证明：
+\[
+  \lim_{n\to\infty}\int_0^1 \frac{n\,f(x)}{1+n^2 x^2}\,dx = \frac{\pi}{2}\,f(0).
+\]
+\end{problem}
+
+\begin{remark*}
+用 $\delta$ 邻域内 $f$ 的连续性控制被积函数，$\delta$ 外用 $f$ 有界和核 $K_n(x)=\frac{n}{1+n^2x^2}$ 的衰减压到任意小。
+\end{remark*}
+
+\begin{solution}
+$f$ 在 $[0,1]$ 上 Riemann 可积，因此有界：存在 $M>0$ 使得 $|f(x)|\le M$ 对所有 $x\in[0,1]$ 成立。
+
+任取 $\varepsilon>0$。由 $f$ 在 $0$ 处连续，存在 $\delta\in(0,1)$ 使得
+\[
+  |x|<\delta \;\Longrightarrow\; |f(x)-f(0)|<\varepsilon.
+\]
+
+\textbf{第一步：尾部估计 $[\delta,1]$。}
+当 $x\ge\delta$ 时，
+\[
+  K_n(x)=\frac{n}{1+n^2x^2}\le\frac{n}{n^2\delta^2}=\frac{1}{n\delta^2},
+\]
+因此
+\[
+  \left|\int_\delta^1 K_n(x)f(x)\,dx\right|\le\frac{M}{n\delta^2}. \tag{1}
+\]
+
+\textbf{第二步：核心估计 $[0,\delta]$。}
+将 $f(x)=f(0)+\bigl(f(x)-f(0)\bigr)$ 代入：
+\[
+  \int_0^\delta K_n(x)f(x)\,dx = f(0)\int_0^\delta K_n(x)\,dx + \int_0^\delta K_n(x)\bigl(f(x)-f(0)\bigr)\,dx.
+\]
+
+第一个积分：
+\[
+  \int_0^\delta K_n(x)\,dx = \bigl[\arctan(nx)\bigr]_0^\delta = \arctan(n\delta). \tag{2}
+\]
+当 $n\to\infty$ 时，$\arctan(n\delta)\to\pi/2$。
+
+第二个积分，由 $|f(x)-f(0)|<\varepsilon$ 在 $[0,\delta]$ 上成立：
+\[
+  \left|\int_0^\delta K_n(x)\bigl(f(x)-f(0)\bigr)\,dx\right| \le \varepsilon\int_0^\delta K_n(x)\,dx \le \frac{\pi\varepsilon}{2}. \tag{3}
+\]
+
+\textbf{第三步：合并。}
+\begin{align*}
+  &\left|\int_0^1 K_n(x)f(x)\,dx - \frac{\pi}{2}f(0)\right| \\
+  &\quad\le |f(0)|\left|\arctan(n\delta)-\frac{\pi}{2}\right| + \frac{\pi\varepsilon}{2} + \frac{M}{n\delta^2}.
+\end{align*}
+取 $N$ 充分大，使 $n\ge N$ 时第一项和第三项各小于 $\varepsilon$。总量被 $(2+\pi/2)\,\varepsilon$ 控制。由 $\varepsilon$ 的任意性，极限为 $\frac{\pi}{2}f(0)$。
+\end{solution}
+\end{document}

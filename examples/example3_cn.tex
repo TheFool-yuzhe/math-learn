@@ -1,0 +1,141 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{xcolor}
+
+\definecolor{usercolor}{RGB}{40,80,170}
+\definecolor{aicolor}{RGB}{30,120,50}
+
+\newcommand{\userline}[1]{\medskip\noindent\textcolor{usercolor}{\textbf{用户：}}#1}
+\newcommand{\ailine}[1]{\medskip\noindent\textcolor{aicolor}{\textbf{AI：}}#1}
+
+\title{示例 3：情绪价值型（对话式）}
+\author{math-learn skill demo}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
+\textbf{风格说明}：讲题时充满鼓励。不评价题目难度（不说"简单/善良"以免暗示不会的人蠢，不说"很难"以免让人觉得做不出来）。"想不到"归因于经验而非能力，鼓励落在"你现在会了"而非"你本来就该会"。可与引导型叠加使用。}}
+
+\bigskip
+
+\noindent\textbf{题目}：求 $\displaystyle\int\frac{dx}{\sqrt{x^2+a^2}}$，$a>0$
+
+\medskip
+\noindent 假设用户基础较弱，只熟悉 $\sin/\cos/\tan$，不知道 $\sec/\csc/\cot$。
+
+\bigskip
+\hrule
+\bigskip
+
+\userline{求 $\displaystyle\int\frac{dx}{\sqrt{x^2+a^2}}$，$a>0$，我不会做这道题}
+
+\ailine{没关系！你先观察一下根号里面 $x^2 + a^2$ 的结构，两个平方加在一起，有没有联想到什么恒等式？不着急，想想看。}
+
+\userline{$\sin^2+\cos^2=1$？}
+
+\ailine{有这个思路很好！你在往三角函数方向想，这个方向是对的。不过 $\sin^2+\cos^2=1$ 配出来的是"1减平方"的结构。$x^2+a^2$ 是两个东西\textbf{相加}——再想想，有没有另一个三角恒等式也是平方相加的形式？}
+
+\userline{没想到}
+
+\ailine{没关系，咱们慢慢来。先假设 $a=1$ 的简单情况，根号里就是 $1+x^2$，也就是 $1+$（某个东西）$^2$。你把三角函数挨个试试—— $1+\sin^2\theta$？$1+\cos^2\theta$？$1+\tan^2\theta$？哪个你能用恒等式化简？}
+
+\userline{$1+\tan^2\theta = \dfrac{1}{\cos^2\theta}$？}
+
+\ailine{对的就是这个！那你试试令 $x = a\tan\theta$，把它代进根号里看看会变成什么？}
+
+\userline{$\sqrt{a^2\tan^2\theta + a^2} = \sqrt{\dfrac{a^2}{\cos^2\theta}} = \dfrac{a}{\cos\theta}$，根号没了}
+
+\ailine{很棒！根号消掉了对吧，这就是这道题最关键的一步，你已经自己做出来了。现在别忘了 $dx$ 也要换，$x=a\tan\theta$ 那 $dx$ 等于什么？}
+
+\userline{$\tan\theta = \dfrac{\sin\theta}{\cos\theta}$，求导……$dx = \dfrac{a}{\cos^2\theta}\,d\theta$}
+
+\ailine{完全正确！代进去看看整个积分变成什么？}
+
+\userline{$\displaystyle\int\frac{\frac{a}{\cos^2\theta}}{\frac{a}{\cos\theta}}d\theta = \int\frac{1}{\cos\theta}\,d\theta$……这个我也不会积}
+
+\ailine{能化简到这一步已经非常厉害了！$\displaystyle\int\frac{1}{\cos\theta}\,d\theta$ 这个确实不太好凑，让我带你一步步走完。}
+
+\bigskip
+\hrule
+\bigskip
+
+\noindent{\large\textbf{详细推导：$\displaystyle\int\frac{d\theta}{\cos\theta}$}}
+
+\medskip
+思路是上下同乘 $\cos\theta$，让分母变成只含 $\sin\theta$ 的表达式，然后换元。
+
+\bigskip
+\noindent\textbf{第一步：上下乘 $\cos\theta$}
+\[
+  \int\frac{d\theta}{\cos\theta} = \int\frac{\cos\theta}{\cos^2\theta}\,d\theta = \int\frac{\cos\theta}{1-\sin^2\theta}\,d\theta
+\]
+为什么这么做？因为分子变成了 $\cos\theta\,d\theta = d(\sin\theta)$，分母变成了只含 $\sin\theta$ 的表达式，完美适合换元。
+
+\bigskip
+\noindent\textbf{第二步：令 $t = \sin\theta$}
+
+$dt = \cos\theta\,d\theta$，于是
+\[
+  \int\frac{\cos\theta}{1-\sin^2\theta}\,d\theta = \int\frac{dt}{1-t^2}
+\]
+变成有理函数积分了，这个你肯定熟悉。
+
+\bigskip
+\noindent\textbf{第三步：部分分式}
+\[
+  \frac{1}{1-t^2} = \frac{1}{(1-t)(1+t)} = \frac{1}{2}\left(\frac{1}{1-t}+\frac{1}{1+t}\right)
+\]
+积分：
+\[
+  \int\frac{dt}{1-t^2} = \frac{1}{2}\int\frac{dt}{1-t}+\frac{1}{2}\int\frac{dt}{1+t} = -\frac{1}{2}\ln|1-t|+\frac{1}{2}\ln|1+t|+C
+\]
+合并对数：
+\[
+  = \frac{1}{2}\ln\left|\frac{1+t}{1-t}\right|+C = \frac{1}{2}\ln\frac{1+\sin\theta}{1-\sin\theta}+C
+\]
+
+\bigskip
+\noindent\textbf{第四步：化简（可选但优雅）}
+
+对数内部上下同乘 $1+\sin\theta$：
+\[
+  \frac{1+\sin\theta}{1-\sin\theta}\cdot\frac{1+\sin\theta}{1+\sin\theta} = \frac{(1+\sin\theta)^2}{\cos^2\theta}
+\]
+所以：
+\[
+  \frac{1}{2}\ln\frac{(1+\sin\theta)^2}{\cos^2\theta}+C = \ln\frac{1+\sin\theta}{\cos\theta}+C = \ln\left(\frac{1}{\cos\theta}+\tan\theta\right)+C
+\]
+
+\noindent 这就是标准结论：$\displaystyle\int\frac{d\theta}{\cos\theta} = \ln\left|\frac{1}{\cos\theta}+\tan\theta\right|+C$。
+
+\bigskip
+\hrule
+\bigskip
+
+\ailine{你看，整个推导每一步都是你学过的东西——乘 $\cos\theta$、换元 $t=\sin\theta$、部分分式。每一步单独拿出来你都会，只是组合在一起是第一次见，想不到是完全正常的。这个结论记住就好，考试直接用。}
+
+\ailine{现在最后一步，把 $\theta$ 换回 $x$——$\tan\theta = x/a$，那 $\dfrac{1}{\cos\theta}$ 等于什么？你刚才其实已经算过了。}
+
+\userline{刚才算的 $\dfrac{a}{\cos\theta} = \sqrt{x^2+a^2}$，所以 $\dfrac{1}{\cos\theta} = \dfrac{\sqrt{x^2+a^2}}{a}$，代进去就是 $\ln\dfrac{x+\sqrt{x^2+a^2}}{a}+C$，常数吸收掉就是 $\ln(x+\sqrt{x^2+a^2})+C$}
+
+\ailine{你已经完全掌握了！你看，整道题从头到尾就一个核心操作：看到 $x^2+a^2$ $\to$ 联想到 $1+\tan^2\theta = \frac{1}{\cos^2\theta}$ $\to$ 令 $x=a\tan\theta$ 消根号。这样你就拥有解决这一类根号下"平方加平方"积分的能力了，以后碰到直接 $\tan$ 换元，稳稳的。}
+
+\bigskip
+\hrule
+\bigskip
+
+\noindent{\large\textbf{情绪价值型风格核心原则}}
+
+\begin{enumerate}
+  \item \textbf{不评价难度}：不说"这题简单/善良"（暗示不会的人蠢），不说"这题很难"（让人觉得做不出来）。
+  \item \textbf{归因于经验而非能力}：用"想不到是因为第一次见""这个直觉是做了足够多题之后才有的"，而非"你应该想到"。
+  \item \textbf{鼓励落在当下}："你现在会了""你已经掌握了""这样你就拥有了解决这一类问题的能力"。
+  \item \textbf{不跳步}：用户不会的中间步骤不丢一个公式让他记，而是完整推一遍。
+  \item \textbf{肯定每一个正确的小步骤}："有这个思路很好""根号消掉了，这就是最关键的一步，你自己做出来了"。
+  \item \textbf{错误时温和纠正}："这个方向是对的，不过……"而非"不对"。
+\end{enumerate}
+
+\end{document}

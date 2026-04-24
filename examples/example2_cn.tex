@@ -1,0 +1,100 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\theoremstyle{plain}
+\newtheorem{problem}{题目}
+
+\newenvironment{solution}{\begin{proof}[证明]}{\end{proof}}
+
+\title{示例 2：细致原理型}
+\author{math-learn skill demo}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
+\textbf{风格说明}：第一部分说"为什么要这么做"（构造动机），第二部分给出完整解题过程，第三部分总结这一类题的通用做法和识别信号。}}
+
+\bigskip
+
+\begin{problem}
+设 $f:[0,1]\to\mathbb{R}$ 在 $[0,1]$ 上连续，在 $(0,1)$ 上可导，且 $f(0)=1$，$f(1)=3e$。证明：存在 $c\in(0,1)$ 使得
+\[
+  f'(c) - f(c) = 2e^{\,c}.
+\]
+\end{problem}
+
+\bigskip
+\noindent\textbf{Part 1：为什么要这么做（逻辑说明）}
+
+\medskip
+目标等式 $f'(c)-f(c)=2e^c$ 的左边是 $f'-f$ 的形式，这恰好是一阶线性 ODE $y'-y=q(x)$ 的结构。处理这类 ODE 的标准手段是乘积分因子 $e^{-x}$，因为：
+\[
+  \frac{d}{dx}\bigl[f(x)e^{-x}\bigr] = f'(x)e^{-x} - f(x)e^{-x} = \bigl(f'(x)-f(x)\bigr)e^{-x}.
+\]
+所以如果令 $h(x)=f(x)e^{-x}$，目标就变成了：证明存在 $c$ 使 $h'(c)=2$。
+
+查端点：$h(0)=f(0)\cdot e^0=1$，$h(1)=f(1)\cdot e^{-1}=3e\cdot e^{-1}=3$。
+
+$h(1)-h(0)=2$，区间长度为 $1$，Lagrange 中值定理直接给出 $h'(c)=2$。
+
+\textbf{构造不是灵感，是从目标倒推出来的。}
+
+\bigskip
+\noindent\textbf{Part 2：完整解题过程}
+
+\begin{solution}
+定义辅助函数：
+\[
+  h(x) = f(x)\,e^{-x}.
+\]
+
+\textbf{验证中值定理条件：}
+\begin{itemize}
+  \item $h$ 在 $[0,1]$ 上连续（连续函数之积）。
+  \item $h$ 在 $(0,1)$ 上可导。
+  \item $h(0) = f(0)\cdot e^{0} = 1$。
+  \item $h(1) = f(1)\cdot e^{-1} = 3e\cdot e^{-1} = 3$。
+\end{itemize}
+
+\textbf{应用 Lagrange 中值定理：}
+
+存在 $c\in(0,1)$ 使得
+\[
+  h'(c) = \frac{h(1)-h(0)}{1-0} = \frac{3-1}{1} = 2.
+\]
+
+\textbf{展开：}
+\[
+  h'(x) = f'(x)\,e^{-x} - f(x)\,e^{-x} = \bigl(f'(x)-f(x)\bigr)\,e^{-x}.
+\]
+由 $h'(c)=2$ 且 $e^{-c}\neq 0$，两边乘 $e^c$：
+\[
+  f'(c)-f(c) = 2e^c. \qedhere
+\]
+\end{solution}
+
+\bigskip
+\noindent\textbf{Part 3：题型总结}
+
+\medskip
+\textbf{识别信号}：结论要求证明 $\exists\,c$ 使得一个含 $f'(c)$ 和 $f(c)$ 的表达式等于某个值，且该表达式形如线性 ODE。
+
+\textbf{通用做法}（对 $f'(c)+p(x)f(c)=q(c)$ 型）：
+\begin{enumerate}
+  \item 识别 $p(x)$。本题 $p(x)=-1$。
+  \item 积分因子：$\mu(x)=e^{\int p(x)\,dx}$。本题 $\mu(x)=e^{-x}$。
+  \item 令 $h(x)=\mu(x)\,f(x)$。则 $h'(x)=\mu(x)\bigl(f'(x)+p(x)f(x)\bigr)=\mu(x)\,q(x)$。
+  \item 算端点值：
+    \begin{itemize}
+      \item $h(a)=h(b)$ $\Longrightarrow$ Rolle 定理：$\exists\,c$ 使 $h'(c)=0$。
+      \item $h(a)\neq h(b)$ $\Longrightarrow$ 中值定理：$\exists\,c$ 使 $h'(c)=\dfrac{h(b)-h(a)}{b-a}$。
+    \end{itemize}
+  \item 将 $h'(c)$ 的值与 $\mu(c)\,q(c)$ 对应，得到结论。
+\end{enumerate}
+
+题目中的端点条件都是精心设计的，使得 MVT/Rolle 的输出恰好和 $\mu(c)\,q(c)$ 匹配。识别出 ODE 结构后，构造完全是机械的。
+
+\end{document}

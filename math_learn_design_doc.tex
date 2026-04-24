@@ -1,0 +1,272 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{enumitem,xcolor,amssymb,verbatim}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+
+\definecolor{Q}{RGB}{180,40,40}
+\definecolor{G}{RGB}{30,120,50}
+\definecolor{B}{RGB}{40,80,170}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  frame=single,
+  breaklines=true,
+  backgroundcolor=\color{gray!8}
+}
+
+\newcommand{\style}[1]{\textcolor{B}{\textbf{#1}}}
+\newcommand{\note}[1]{\textcolor{G}{\textbf{【备注】}#1}}
+
+\title{\texttt{math-learn} skill 全流程设计文档（终版）}
+\author{愚者 \& Claude 协作整理}
+\date{2026年4月}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=======================================================
+\section{Skill 概览}
+%=======================================================
+
+\texttt{math-learn} 是面向大学数学自学场景的 Claude skill，提供三大核心能力：
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{个性化讲题}——通过 \texttt{mathsoul.yaml} 持久化用户偏好（专业、风格、存储习惯）。
+  \item \textbf{自动记录}——\texttt{tmp/} 暂存 + 按学科归档的持久化知识库。
+  \item \textbf{错题考验}——基于历史记录出题、自测、查漏补缺。
+\end{enumerate}
+
+\textbf{优先级原则}：当次对话中用户的明确要求 $>$ \texttt{mathsoul} 中的默认设置 $>$ skill 内置规则。
+
+%=======================================================
+\section{首次调用：\texttt{initML} 初始化}
+%=======================================================
+
+用户输入 \texttt{initML}（或自然语言"初始化"等），skill 依次询问：
+
+\begin{enumerate}[label=\arabic*.]
+  \item \textbf{专业分类}：数学系 / 理工 / 非理工。
+  \item \textbf{是否需要 PDF 讲解}（默认值由专业决定，见 \ref{sec:pdf-strategy}）。
+  \item \textbf{讲题风格}（可多选，可自定义）：
+    \begin{itemize}
+      \item 数学分析式语言
+      \item 细致原理型
+      \item 思路引导型
+      \item 其他（用户自由输入）
+    \end{itemize}
+  \item \textbf{默认存储设置}：每道题/知识点默认存储还是不存储。
+  \item \textbf{初始学科}：如"数学分析""高等代数"等，作为文件夹名称。
+\end{enumerate}
+
+用户回答后，未提及或说"随意"的项按专业自动填充，并明确提醒用户当前设置及如何修改。结果写入 \texttt{mathsoul.yaml}。
+
+\subsection{mathsoul 更新机制}
+
+用户可随时通过自然语言修改偏好（如"以后给我细致讲"），skill 自动识别并更新 \texttt{mathsoul.yaml}，无需重新走 \texttt{initML} 全流程。
+
+%=======================================================
+\section{专业默认策略}
+%=======================================================
+
+\subsection{数学系}
+\begin{itemize}
+  \item 风格默认：数学分析式语言。
+  \item PDF：除极简单问题外，均生成 PDF。
+  \item 聊天框回复三部分：思路启发、中文 PDF、中文 \LaTeX\ 源码。
+\end{itemize}
+
+\subsection{理工院系}
+\begin{itemize}
+  \item 风格默认：思路引导型优先。
+  \item PDF：仅复杂问题生成。
+  \item 先回复方法而非答案；用户要求答案时给解题过程 + 题型拆解 + 核心知识点。
+\end{itemize}
+
+\subsection{非理工院系}
+\begin{itemize}
+  \item 风格默认：细致原理型。
+  \item PDF：基本不生成，除非用户特别要求。
+  \item 极其细致讲解每个知识点的"为什么"；用户要求引导时，切换为不直接给答案。
+\end{itemize}
+
+\subsection{PDF 策略}\label{sec:pdf-strategy}
+
+\textbf{默认编译中文 PDF}（ctexart + XeLaTeX），同时附中文 \LaTeX\ 源码。
+
+用户也可将自行编译好的 PDF 交给模型，模型按命名规则重命名并存入对应位置。
+
+\medskip
+\noindent\textbf{网页版大模型 fallback}：若运行在网页版大模型环境（如 Claude.ai、DeepSeek 网页版）中，模型自带环境编译中文 \LaTeX\ 会报错，此时自动改为\textbf{英文 PDF + 中文 \LaTeX\ 源码}。同时，网页版 memory 容量有限，无法支持文件持久化，仅支持\textbf{讲题风格偏好}这一功能。
+
+%=======================================================
+\section{讲题风格详述}
+%=======================================================
+
+\subsection{\style{数学分析式语言}（示例见 Example 1 PDF）}
+
+\textbf{回复结构}：
+\begin{enumerate}
+  \item \textbf{直觉}：一句话点明核心思路，如"用 $\delta$ 邻域内 $f$ 的连续性控制被积函数，$\delta$ 外用 $f$ 有界和核衰减压到任意小"。
+  \item \textbf{严谨证明}：完整的 $\varepsilon$-$\delta$ 语言，不省略量词和估计链。
+\end{enumerate}
+
+\subsection{\style{细致原理型}（示例见 Example 2 PDF）}
+
+\textbf{回复结构}：
+\begin{enumerate}
+  \item \textbf{逻辑说明}：这道题为什么要这么做，构造动机从何而来。
+  \item \textbf{完整过程}：给出解题全过程。
+  \item \textbf{题型总结}：这一类题的通用做法、识别信号。
+\end{enumerate}
+
+\subsection{\style{思路引导型}（可与上述叠加）}
+
+\textbf{回复结构}：
+\begin{enumerate}
+  \item 给一个方向性提示（如"考虑构造辅助函数使端点值相等"），不直接给答案。
+  \item 等用户回复后逐步深入。
+  \item 用户明确要求看答案时，再按对应风格完整展开。
+\end{enumerate}
+
+\note{引导型与其他风格叠加时，引导型优先压制直接给答案的部分，直到用户主动要求。}
+
+%=======================================================
+\section{文件结构}
+%=======================================================
+
+\begin{lstlisting}
+math-learn/
+|-- mathsoul.yaml         # 用户偏好配置
+|-- AI.txt                # 全局讲题注意点（模型自我提示）
+|-- tmp/                  # 暂存区
+|   |-- question.md
+|   `-- knowledge.md
+|-- 数学分析/              # 学科文件夹（示例）
+|   |-- question.md       # 题目索引
+|   |-- knowledge.md      # 知识点索引
+|   |-- note.md           # 本学科局部注意点
+|   |-- 1.md, 2.md, ...   # 单题/单知识点详细讲解
+|   |-- 1.tex, 2.tex, ... # 对应中文 LaTeX 源码
+|   `-- 1.pdf, 2.pdf, ... # 编译好的 PDF（如有）
+|-- 高等代数/
+|   `-- ...
+|-- examples/              # skill 内置示例
+|   |-- example1.tex       # 分析式语言示例
+|   `-- example2.tex       # 细致原理型示例
+`-- README.md
+\end{lstlisting}
+
+\subsection{tmp 暂存区}
+
+\texttt{tmp/question.md} 和 \texttt{tmp/knowledge.md} 格式，头部注释：
+\begin{lstlisting}
+<!-- 存储: 是 | 学科: 数学分析 -->
+\end{lstlisting}
+
+每次对话中，模型根据用户理解程度持续\textbf{覆写}当前内容。同一知识点多次提问时，覆写为最新版本，但保留一段简短的"提问历史"（第几次问、每次卡在哪）。
+
+\subsection{学科文件夹}
+
+\textbf{question.md}（题目索引，汇总式）：
+\begin{lstlisting}
+1、求证：闭区间黎曼可积函数连续点稠密 ——1.md (1.pdf)
+2、证明 Dini 定理 ——2.md
+3、...
+\end{lstlisting}
+
+\textbf{knowledge.md}（知识点索引 + 简要讲解）：
+\begin{lstlisting}
+1、洛必达法则无穷比无穷型不一定要求分子趋于无穷大 ——alpha1.md (alpha1.pdf)
+  讲解：（由 AI 从 tmp 对话中提炼写入）
+2、...
+\end{lstlisting}
+
+\textbf{note.md}：本学科特异性的讲题注意点（如"该用户对 $\varepsilon$-$\delta$ 证明容易漏量词"）。模型觉得值得记录时写入。
+
+\textbf{编号对应规则}：第 $k$ 题严格对应 \texttt{k.md}、\texttt{k.tex}、\texttt{k.pdf}。无 PDF 的题直接跳过该编号的 \texttt{.pdf} 文件，编号必须一一对应。
+
+\subsection{AI.txt（顶层，全局共享）}
+
+存放跨学科的通用讲题注意点。模型在对话中发现值得记录的注意事项时主动写入（而非每次 tmp 归档都追加，避免冗余）。
+
+回答问题时，模型读取：\texttt{AI.txt}（全局）+ 对应学科 \texttt{note.md}（局部）。
+
+%=======================================================
+\section{讲题完整流程}
+%=======================================================
+
+\subsection{用户提问时}
+
+\begin{enumerate}
+  \item 判定所属学科，读取 \texttt{AI.txt} + 该学科 \texttt{note.md}。
+  \item 按 \texttt{mathsoul.yaml} 设定的风格回复。
+  \item 回复末尾附存储信息："这是 X 学科的，默认存储/不存储，可修改。"
+  \item 若用户未指定学科，模型自行判定（归入已有 or 新建），并提醒用户。
+  \item 将内容写入 \texttt{tmp/}。
+\end{enumerate}
+
+\subsection{新对话开启时（tmp 归档）}
+
+\begin{enumerate}
+  \item 检查 \texttt{tmp/} 是否有内容。
+  \item 根据头部标注：
+    \begin{itemize}
+      \item 标注"存储" $\to$ 归档到对应学科文件夹，更新索引。
+      \item 标注"不存储" $\to$ 删除。
+    \end{itemize}
+  \item 清空 \texttt{tmp/}。
+  \item 如有值得记录的注意点，写入 \texttt{AI.txt} 或学科 \texttt{note.md}。
+\end{enumerate}
+
+%=======================================================
+\section{功能菜单}
+%=======================================================
+
+用户输入 \texttt{initML} 后展示功能选项，也支持自然语言触发：
+
+\begin{enumerate}
+  \item \textbf{初始化设置}——创建或重写 \texttt{mathsoul.yaml}。
+  \item \textbf{流程简介}——展示 skill 使用方法。
+  \item \textbf{新建学科文件夹}——如"概率论""常微分方程"等。
+  \item \textbf{错题考验}——从指定学科出题：
+    \begin{itemize}
+      \item 先问用户：针对哪些知识点/题目？出几道？
+      \item 出题来源：优先从互联网/教材找新题；数学系级别找不到合适新题时，用原题 + AI 编题（标注"AI 生成，非来自互联网"）。
+      \item 默认先出题不附答案，用户要求时再给答案 PDF。
+      \item 默认不存储；用户要求存储则走 \texttt{tmp} 系统。
+    \end{itemize}
+\end{enumerate}
+
+%=======================================================
+\section{Skill 文件构成}
+%=======================================================
+
+\texttt{math-learn} skill 自身包含以下文件：
+\begin{itemize}
+  \item \texttt{SKILL.md}——主文件，含全部流程、规范、prompt 指令。
+  \item \texttt{mathsoul\_template.yaml}——默认配置模板。
+  \item \texttt{examples/example1.tex}——数学分析式语言示例。
+  \item \texttt{examples/example2.tex}——细致原理型示例。
+  \item \texttt{examples/example\_total.md}——风格总领说明 + 引导型对话示例 + 用户自定义扩展区。
+  \item \texttt{README.md}——面向用户的简洁使用说明。
+\end{itemize}
+
+%=======================================================
+\section{兼容性}
+%=======================================================
+
+本 skill 设计兼容以下环境运行：
+\begin{description}
+  \item[OpenClaw（推荐）] 本地文件持久化，iPad/手机端远程调用，完整功能支持。
+  \item[Codex / Claude Code] 本地终端环境，完整功能支持。
+\end{description}
+
+\noindent\textbf{网页版大模型（Claude.ai / DeepSeek 网页版等）限制}：
+\begin{itemize}
+  \item 模型自带环境编译中文 \LaTeX\ 会报错，将自动改为英文 PDF + 中文 \LaTeX\ 源码。
+  \item 网页版 memory 容量有限，无法支持文件持久化，仅支持\textbf{讲题风格偏好}这一功能。
+\end{itemize}
+
+\end{document}

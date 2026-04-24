@@ -1,0 +1,26 @@
+# math-learn 用户偏好配置
+# 由 initML 初始化生成，可随时通过自然语言修改
+
+major: ""              # 数学系 / 理工 / 非理工
+
+style:
+  primary: ""          # 数学分析式语言 / 细致原理型 / 思路引导型 / 自定义
+  secondary: ""        # 可选叠加风格（如 引导型 + 原理型）
+  custom_notes: ""     # 用户自定义的额外风格要求
+
+pdf:
+  enabled: true        # 是否生成 PDF
+  # 数学系默认: true（除极简单问题）
+  # 理工默认: 仅复杂问题
+  # 非理工默认: false（除非特别要求）
+  language_note: "默认编译中文PDF。网页版大模型环境中文编译不稳定时，改为英文PDF+中文LaTeX源码"
+
+storage:
+  default: true        # 默认存储每道题/知识点: true / false
+
+subjects:              # 学科文件夹列表
+  - ""
+  # 示例:
+  # - 数学分析
+  # - 高等代数
+  # - 概率论
